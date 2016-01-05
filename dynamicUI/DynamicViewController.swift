@@ -26,7 +26,9 @@ class DynamicViewController: UIViewController {
         makeRound(greenCircle)
         makeRound(redCircle)
         
-        createAnimationEffects()
+        initalizeAnimator()
+        updateAnimatorWith(greenCircle)
+        updateAnimatorWith(redCircle)
 
     }
 
@@ -47,37 +49,40 @@ extension DynamicViewController {
         for touch in touches {
             let location = touch.locationInView(view)
             createRandomViews(location.x, y: location.y)
+
         }
         
     }
     
-    func createAnimationEffects() {
+    func initalizeAnimator() {
+        //create this for the viewDidLoad so that the animator has its first few behaviors working. we do this so that we can later add views programatically
         animator = UIDynamicAnimator(referenceView: view)
-        
-        //adding our views to be processed by gravity.
-        gravity.addItem(greenCircle)
-        gravity.addItem(redCircle)
-        
         //adding the gravity process to our animator...so that the viewController updates what is happening
         animator?.addBehavior(gravity)
         
-        //adding the views to the collision behaviors so they collide with each other
-        collisionBehavior.addItem(greenCircle)
-        collisionBehavior.addItem(redCircle)
-        
-        //turning the boundaries into boundaries
+        //turning the bounds into boundaries
         collisionBehavior.translatesReferenceBoundsIntoBoundary = true
-        
         //adding collisionBehavior to the animator
         animator?.addBehavior(collisionBehavior)
+    }
+    
+    func updateAnimatorWith(view:UIView) {
+        //adding our views to be processed by gravity.
+        gravity.addItem(view)
+        
+        //adding the views to the collision behaviors so they collide with each other
+        collisionBehavior.addItem(view)
         
     }
     
     func createRandomViews(x:CGFloat, y:CGFloat) {
         let size:CGFloat = 40
         let view = UIView(frame: CGRect(x: x, y: y, width: size, height: size))
+        makeRound(view)
         view.backgroundColor = getRandomColor(0.66)
         self.view.addSubview(view)
+        
+        updateAnimatorWith(view)
         
     }
     
@@ -88,6 +93,7 @@ extension DynamicViewController {
         
         //convert the UIColor to CGColor
         return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: alpha)
+        
     }
     
 }
