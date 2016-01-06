@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreMotion
 
 class DynamicViewController: UIViewController {
     
@@ -15,6 +16,11 @@ class DynamicViewController: UIViewController {
     var animator:UIDynamicAnimator?
     let gravity = UIGravityBehavior()
     let collisionBehavior = UICollisionBehavior()
+    
+    //for motion
+    let motionQueue = NSOperationQueue()
+    let motionManager = CMMotionManager()
+    
 
     //MARK: @IBOutlets
     @IBOutlet weak var greenCircle: UIView!
@@ -31,10 +37,30 @@ class DynamicViewController: UIViewController {
         updateAnimatorWith(redCircle)
 
     }
+    
+    override func viewDidAppear(animated: Bool) {
+        motionManager.startDeviceMotionUpdatesToQueue(motionQueue, withHandler: gravityUpdated)
+        
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
 
+    }
+    
+    func gravityUpdated(motion: CMDeviceMotion?, error: NSError?) {
+        if error != nil {
+            print(error)
+        }
+        
+        guard let motionGravity = motion?.gravity else { return }
+        
+        let x = CGFloat(motionGravity.x)
+        let y = CGFloat(motionGravity.y)
+        
+        let p = CGVectorMake(-x, -y)
+        gravity.gravityDirection = p
+        
     }
 
 }
@@ -96,4 +122,9 @@ extension DynamicViewController {
         
     }
     
+}
+
+extension DynamicViewController : UIAccelerometerDelegate {
+    
+        
 }
