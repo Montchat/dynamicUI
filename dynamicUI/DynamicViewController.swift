@@ -20,7 +20,6 @@ class DynamicViewController: UIViewController {
     //for motion
     let motionQueue = NSOperationQueue()
     let motionManager = CMMotionManager()
-    
 
     //MARK: @IBOutlets
     @IBOutlet weak var greenCircle: UIView!
@@ -28,7 +27,7 @@ class DynamicViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+    
         makeRound(greenCircle)
         makeRound(redCircle)
         
@@ -58,7 +57,7 @@ class DynamicViewController: UIViewController {
         let x = CGFloat(motionGravity.x)
         let y = CGFloat(motionGravity.y)
         
-        let p = CGVectorMake(-x, -y)
+        let p = CGVectorMake(x, -y)
         gravity.gravityDirection = p
         
     }
@@ -66,15 +65,31 @@ class DynamicViewController: UIViewController {
 }
 
 extension DynamicViewController {
+    
+    //makesAddedViewsRound
     func makeRound(view:UIView) {
         view.layer.cornerRadius = view.frame.width / 2
         
     }
     
+    //checks to see if we are touching the backgroundView or a view that has already been added.
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         for touch in touches {
             let location = touch.locationInView(view)
-            createRandomViews(location.x, y: location.y)
+            if touch.view == self.view {
+                
+                //add a new view
+                createRandomViews(location.x, y: location.y)
+                
+            } else {
+                UIView.animateWithDuration(0.33, animations: { () -> Void in
+                    touch.view?.alpha = 0
+                    }, completion: { (Bool) -> Void in
+                        //fade away an added view and remove it from the Superview
+                        touch.view?.removeFromSuperview()
+                })
+                
+            }
 
         }
         
@@ -101,11 +116,13 @@ extension DynamicViewController {
         
     }
     
+    //creates a view with a random color
     func createRandomViews(x:CGFloat, y:CGFloat) {
         let size:CGFloat = 40
         let view = UIView(frame: CGRect(x: x, y: y, width: size, height: size))
         makeRound(view)
         view.backgroundColor = getRandomColor(0.66)
+        
         self.view.addSubview(view)
         
         updateAnimatorWith(view)
@@ -124,6 +141,7 @@ extension DynamicViewController {
     
 }
 
+//to take advantage of accelerometer
 extension DynamicViewController : UIAccelerometerDelegate {
     
         
